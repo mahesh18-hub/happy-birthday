@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Birthday 🎂</title>
+  <style>
+    :root{
+      --bg1:#ff0080; --bg2:#ff8c00; --bg3:#ffe100; --bg4:#00d2ff; --bg5:#6a00ff;
+      --card:#111418ee; --text:#f8fafc; --accent:#ffd166; --glow:#9b5de5;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color:var(--text);
+      overflow:hidden;
+      background:linear-gradient(120deg,var(--bg1),var(--bg2),var(--bg3),var(--bg4),var(--bg5));
+      background-size: 300% 300%;
+      animation:bgShift 18s ease-in-out infinite;
+    }
+
+    /* Animated gradient background */
+    @keyframes bgShift{
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
+
+    /* Confetti canvas */
+    canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:1}
+
+    /* Layout */
+    .wrap{position:relative;z-index:2;display:grid;place-items:center;height:100%;padding:24px}
+
+    .card{
+      width:min(920px,92vw);min-height:380px;
+      background:var(--card); backdrop-filter: blur(8px);
+      border:1px solid #ffffff24; border-radius:28px;
+      box-shadow:0 20px 60px #0008, inset 0 0 0 1px #fff2;
+      display:grid; grid-template-columns: 260px 1fr; gap:28px; padding:28px;
+    }
+
+    /* Photo */
+    .photo-wrap{display:grid;place-items:center}
+    .photo{
+      width:220px;height:220px; border-radius:50%; overflow:hidden; position:relative;
+      box-shadow:0 10px 40px #000a, 0 0 0 8px #ffffff12;
+      animation:popIn 1s cubic-bezier(.2,1,.2,1) .4s both, pulse 3s ease-in-out infinite;
+    }
+    .photo img{width:100%;height:100%;object-fit:cover;display:block}
+
+    @keyframes popIn{from{transform:scale(.7) rotate(-6deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1}}
+    @keyframes pulse{0%,100%{box-shadow:0 10px 40px #000a, 0 0 0 8px #ffffff12} 50%{box-shadow:0 10px 50px #000c, 0 0 0 14px #ffffff26}}
+
+    /* Content */
+    .content{display:flex;flex-direction:column;gap:14px;align-self:center}
+    .badge{align-self:flex-start; padding:8px 12px; border-radius:999px; font-weight:600; letter-spacing:.4px;
+      background:linear-gradient(90deg,#ffecd2,#fcb69f); color:#1f2937; box-shadow:inset 0 0 0 1px #0001;}
+
+    h1{
+      margin:4px 0 0; font-size:clamp(28px,5vw,48px); line-height:1.15; letter-spacing:.5px;
+      text-shadow:0 2px 0 #0007, 0 10px 30px #0008;
+    }
+    .name{color:var(--accent); text-shadow:0 0 20px #ffd16666, 0 0 40px #ffd16644;}
+
+    .type{min-height:2.4em; font-size:clamp(16px,2.4vw,20px); opacity:.95}
+    .sub{opacity:.9}
+
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+    button, .ghost{
+      border:0; background:#ffffff12; color:var(--text); padding:12px 16px; border-radius:16px; font-weight:600; cursor:pointer;
+      box-shadow:inset 0 0 0 1px #ffffff24; transition:.2s transform, .2s box-shadow, .2s background;
+    }
+    button:hover{transform:translateY(-2px); box-shadow:0 10px 20px #0006, inset 0 0 0 1px #fff3}
+    .primary{background:linear-gradient(135deg,#ff9a9e,#fad0c4); color:#111}
+    .ghost{display:inline-grid;place-items:center;padding:12px 14px}
+
+    /* Floating balloons */
+    .balloon{position:fixed; bottom:-120px; width:60px; height:80px; border-radius:60px 60px 60px 60px; opacity:.75; filter:saturate(1.2);
+      box-shadow:inset -8px -16px 20px #0003, 0 10px 30px #0006; z-index:0}
+    .balloon:after{content:""; position:absolute; bottom:-16px; left:50%; width:2px; height:28px; background:#fff6; transform:translateX(-50%)}
+
+    @keyframes floatUp{from{transform:translateY(0)} to{transform:translateY(-120vh)}}
+
+    /* Sparkles */
+    .sparkle{position:fixed; width:3px; height:3px; background:#fff; border-radius:50%; box-shadow:0 0 10px 3px #fff7; opacity:.9; z-index:1;
+      animation:spark 2.6s linear infinite}
+    @keyframes spark{0%{transform:translateY(0) scale(1)} 100%{transform:translateY(-120vh) scale(0)}}
+
+    /* Audio overlay */
+    .gate{
+      position:fixed; inset:0; display:grid; place-items:center; background:linear-gradient(135deg,#0b0e12cc,#141920cc);
+      backdrop-filter: blur(4px); z-index:5; transition: .4s opacity ease;
+    }
+    .gate.hidden{opacity:0; pointer-events:none}
+    .gate .panel{
+      width:min(520px,92vw); text-align:center; padding:28px; border-radius:24px; background:#0e1217; color:#e5e7eb;
+      border:1px solid #ffffff1a; box-shadow:0 20px 60px #000a;
+    }
+    .gate h2{margin:0 0 8px; font-size:clamp(22px,4.6vw,32px)}
+    .gate p{margin:0 0 18px; opacity:.9}
+
+    /* Responsive */
+    @media (max-width:760px){
+      .card{grid-template-columns:1fr; text-align:center}
+      .photo-wrap{order:-1}
+      .badge{align-self:center}
+      .actions{justify-content:center}
+    }
+
+    /* Toast */
+    .toast{position:fixed; bottom:16px; left:50%; transform:translateX(-50%); background:#111a; color:#fff; padding:10px 14px; border-radius:12px; z-index:6; opacity:0; transition:.3s}
+    .toast.show{opacity:1}
+  </style>
+</head>
+<body>
+  <canvas id="confetti"></canvas>
+
+  <!-- UI Gate to start audio (browser autoplay policies) -->
+  <div class="gate" id="gate">
+    <div class="panel">
+      <h2>Ready to celebrate? 🎉</h2>
+      <p>Click start to play the birthday song and launch the animations.</p>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
+        <button id="startBtn" class="primary">Start the Party ▶️</button>
+        <label class="ghost" title="Choose your own song (MP3)">
+          <input type="file" id="songPicker" accept="audio/mpeg,audio/mp3,audio/*" style="display:none" />
+          Use my song 🎵
+        </label>
+        <label class="ghost" title="Choose a different photo">
+          <input type="file" id="photoPicker" accept="image/*" style="display:none" />
+          Add your photo 📷
+        </label>
+      </div>
+      <p style="font-size:12px;opacity:.8;margin-top:10px">Tip: Place a file named <code>song.mp3</code> and <code>photo.jpg</code> next to this HTML to auto-load them.</p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="photo-wrap">
+        <div class="photo"><img id="avatar" src="image.jpg" alt="Birthday photo" onerror="this.src='data:image/svg+xml;utf8,\
+        <svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 240 240\'>\
+          <defs><linearGradient id=\'g\' x1=\'0\' x2=\'1\'><stop stop-color=\'%23ff9a9e\'/><stop offset=\'1\' stop-color=\'%23fad0c4\'/></linearGradient></defs>\
+          <rect width=\'100%\' height=\'100%\' fill=\'%2310161e\'/>\
+          <circle cx=\'120\' cy=\'120\' r=\'92\' fill=\'url(%23g)\'/>\
+          <text x=\'50%\' y=\'52%\' text-anchor=\'middle\' font-size=\'26\' fill=\'%2310161e\' font-family=\'Verdana\'>PHOTO</text></svg>'"> </div>
+      </div>
+      <div class="content">
+        <span class="badge">🎂 Happy Birthday</span>
+        <h1>To the amazing <span class="name" id="who">Princes</span> ✨</h1>
+        <div class="type" id="type"></div>
+        <div class="sub">Wishing you a day filled with love, laughter, and all your favorite things. May this year surprise you in the best ways! 🥳</div>
+        <div class="actions">
+          <button id="replay" title="Replay wishes">Replay ✨</button>
+          <button id="fire" class="primary" title="Confetti blast">Confetti 💥</button>
+          <button id="mute">Mute 🔇</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden audio; will play on first click -->
+  <audio id="song" src="song.mp3" preload="auto"></audio>
+
+  <div class="toast" id="toast">Autoplay blocked — song will start after you click Start.</div>
+
+  <script>
+    // ======== Customizable bits ========
+    const PERSON_NAME = "Princes"; // <- change the displayed name
+    const LINES = [
+      "May your smiles be bright and your worries light!",
+      "Another year older, twice as awesome!",
+      "Keep shining, keep dreaming, keep being YOU."
+    ];
+
+    document.getElementById('who').textContent = PERSON_NAME;
+
+    // ======== Typewriter ========
+    const typeBox = document.getElementById('type');
+    async function typeLines(lines, speed=32, pause=900){
+      for (const line of lines){
+        await type(line, speed);
+        await wait(pause);
+        await erase(speed/1.2);
+        await wait(120);
+      }
+      await type(lines[lines.length-1], speed);
+    }
+    function type(text, speed){
+      return new Promise(resolve=>{
+        typeBox.textContent = '';
+        let i=0;
+        const iv = setInterval(()=>{
+          typeBox.textContent = text.slice(0, ++i) + (i%2?"_":"");
+          if(i>=text.length){ clearInterval(iv); typeBox.textContent = text; resolve(); }
+        }, speed);
+      })
+    }
+    function erase(speed){
+      return new Promise(resolve=>{
+        const t = typeBox.textContent;
+        let i=t.length;
+        const iv = setInterval(()=>{
+          typeBox.textContent = t.slice(0, --i);
+          if(i<=0){ clearInterval(iv); resolve(); }
+        }, speed);
+      })
+    }
+    const wait = (ms)=> new Promise(r=>setTimeout(r,ms));
+
+    // ======== Confetti ========
+    const confetti = document.getElementById('confetti');
+    const ctx = confetti.getContext('2d');
+    let W, H; let pieces=[]; let last=0; let confettiBursting=false;
+    function resize(){ W=confetti.width=innerWidth; H=confetti.height=innerHeight }
+    addEventListener('resize', resize); resize();
+
+    function spawnConfetti(count=180){
+      for(let i=0;i<count;i++){
+        pieces.push({
+          x: Math.random()*W,
+          y: -20 - Math.random()*H,
+          s: 6+Math.random()*10,
+          r: Math.random()*Math.PI,
+          v: 2+Math.random()*3,
+          c: `hsl(${~~(Math.random()*360)},100%,60%)`
+        });
+      }
+    }
+
+    function drawConfetti(t){
+      const dt = (t-last)||16; last=t; ctx.clearRect(0,0,W,H);
+      pieces.forEach(p=>{
+        p.y += p.v; p.x += Math.sin((p.y+p.s)*0.02)*1.5; p.r += 0.1;
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
+        ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/3,p.s,p.s/1.5); ctx.restore();
+      })
+      pieces = pieces.filter(p=>p.y<H+40);
+      requestAnimationFrame(drawConfetti);
+    }
+    requestAnimationFrame(drawConfetti);
+
+    // ======== Balloons & Sparkles ========
+    function launchBalloons(n=10){
+      for(let i=0;i<n;i++){
+        const b=document.createElement('div'); b.className='balloon';
+        const hue=~~(Math.random()*360); b.style.background=`radial-gradient(circle at 30% 30%, #fff8, hsl(${hue} 80% 55%))`;
+        b.style.left=~~(Math.random()*100)+'vw'; b.style.animation=`floatUp ${8+Math.random()*6}s linear forwards`;
+        b.style.width=50+Math.random()*40+'px'; b.style.height=70+Math.random()*50+'px';
+        document.body.appendChild(b); setTimeout(()=>b.remove(), 15000);
+      }
+    }
+    function sprinkle(n=60){
+      for(let i=0;i<n;i++){
+        const s=document.createElement('div'); s.className='sparkle';
+        s.style.left=~~(Math.random()*100)+'vw'; s.style.bottom='-10vh'; s.style.animationDuration = (1.8+Math.random()*1.4)+'s';
+        document.body.appendChild(s); setTimeout(()=>s.remove(), 2800);
+      }
+    }
+
+    // ======== Audio handling ========
+    const audio = document.getElementById('song');
+    const gate = document.getElementById('gate');
+    const toast = document.getElementById('toast');
+    const muteBtn = document.getElementById('mute');
+    function showToast(msg){ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2500) }
+
+    async function startParty(){
+      // Start animations
+      spawnConfetti(260); confettiBursting=true; launchBalloons(16); sprinkle(60); typeLines(LINES);
+      // Try to play
+      try{
+        await audio.play();
+      }catch(e){
+        showToast('Autoplay blocked — press Start to begin audio.');
+      }
+      gate.classList.add('hidden');
+    }
+
+    document.getElementById('startBtn').addEventListener('click', startParty);
+    document.getElementById('replay').addEventListener('click', ()=>{ typeLines(LINES); spawnConfetti(120); launchBalloons(10); sprinkle(40) });
+    document.getElementById('fire').addEventListener('click', ()=>{ spawnConfetti(220); launchBalloons(12); sprinkle(50) });
+
+    muteBtn.addEventListener('click', ()=>{
+      audio.muted = !audio.muted; muteBtn.textContent = audio.muted ? 'Unmute 🔈' : 'Mute 🔇';
+    })
+
+    // Optional: auto-attempt play shortly (will be blocked until user interacts on most browsers)
+    audio.addEventListener('canplay', async ()=>{
+      try{ await audio.play(); }catch(e){ /* ignored until click */ }
+    });
+
+    // Song chooser
+    document.getElementById('songPicker').addEventListener('change', (e)=>{
+      const f=e.target.files[0]; if(!f) return; audio.src = URL.createObjectURL(f); showToast('Custom song loaded!');
+    });
+    // Photo chooser
+    document.getElementById('photoPicker').addEventListener('change', (e)=>{
+      const f=e.target.files[0]; if(!f) return; document.getElementById('avatar').src = URL.createObjectURL(f); showToast('Photo updated!');
+    });
+  </script>
+</body>
+</html>
